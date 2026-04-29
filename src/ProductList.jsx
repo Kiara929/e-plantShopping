@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './ProductList.css'
 import CartItem from './CartItem';
-import { addItem } from './CartSlice';
+import { addItem, updateQuantity, removeItem } from './CartSlice';
+import { useDispatch, useSelector } from 'react-redux';
+
 function ProductList({ onHomeClick }) {
     const [showCart, setShowCart] = useState(false);
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
+    const dispatch = useDispatch();
+    
+
 
     const plantsArray = [
         {
@@ -234,8 +239,15 @@ function ProductList({ onHomeClick }) {
         textDecoration: 'none',
     }
 
-    const [addedToCart, setAddedToCart] = useState({});
+    const cart = useSelector(state => state.cart.items);
 
+    const isAddedToCart = (plantName) => {
+        return cart.some(item => item.name === plantName);
+    };
+
+    const calculateTotalQuantity = () => {
+        return cart.reduce((total, item) => total + item.quantity, 0);
+    };
     const handleHomeClick = (e) => {
         e.preventDefault();
         onHomeClick();
@@ -257,7 +269,6 @@ function ProductList({ onHomeClick }) {
     };
 
     const handleAddToCart = (product) => {
-        e.preventDefault();
         dispatch(addItem(product));
 
         setAddedToCart((prevState) => ({
@@ -309,6 +320,11 @@ function ProductList({ onHomeClick }) {
                             <button
                                 className="product-button"
                                 onClick={() => handleAddToCart(plant)} // Handle adding plant to cart
+                                disabled={isAddedToCart(plant.name)}
+style={{
+    backgroundColor: isAddedToCart(plant.name) ? "gray" : "#4CAF50",
+    cursor: isAddedToCart(plant.name) ? "not-allowed" : "pointer"
+}}
                             >
                                 Add to Cart
                             </button>
